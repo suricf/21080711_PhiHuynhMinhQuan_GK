@@ -1,0 +1,18 @@
+{
+  "name": "21080711-phihuynhminhquan-gk1",
+  "version": "1.0.0",
+  "scripts": {
+    "server": "node server.js",
+    "start": "expo start",
+    "client": "cd client && npm run web",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "dependencies": {
+    "concurrently": "^9.0.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.1"
+  }
+}
