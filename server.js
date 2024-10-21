@@ -164,7 +164,7 @@ app.post('/api/login', (req, res) => {
         res.status(401).json({ message: 'Invalid email or password' });
     }
 });
-app.get('/api/donuts', (req, res) => {
+app.get('/api/users', (req, res) => {
     res.json(users);
 });
 // Khởi động server

@@ -22,7 +22,7 @@ const Screen_02 = () => {
     const [cart, setCart] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
     const [visibleCart, setVisibleCart] = useState(false);
-
+    const [quantity, setQuantity] = useState(1); 
     // Tạo ref cho TextInput
     const searchInputRef = useRef(null);
 
@@ -89,7 +89,8 @@ const Screen_02 = () => {
             </View>
             <View style={styles.productPriceContainer}>
                 {isCart ? (
-                    <></>
+                    // Hiển thị số lượng nếu là giỏ hàng
+                    <Text style={styles.productQuantity}>Quantity: {item.quantity}</Text>
                 ) : (
                     <TouchableOpacity
                         onPress={() => {
@@ -104,7 +105,13 @@ const Screen_02 = () => {
             </View>
         </View>
     );
-
+    const calculateTotal = () => {
+        return cart.reduce((total, item) => {
+            const priceWithoutDollar = item.price.replace('$', ''); // Xóa ký hiệu $
+            const price = parseFloat(priceWithoutDollar); // Chuyển đổi thành số
+            return total + price * item.quantity; // Tính tổng
+        }, 0);
+    };
     const filteredProducts = useMemo(() => {
         const selectedCategory = product.find((item) => item[focus]);
         if (!selectedCategory) return [];
@@ -142,29 +149,26 @@ const Screen_02 = () => {
                         </View>
 
                         {/* Modal cart */}
-                        <Modal
-                            animationType="fade"
-                            transparent={true}
-                            visible={visibleCart}
-                            onRequestClose={() => setVisible(false)}
-                        >
-                            <View style={styles.modalOverlay}>
-                                <View style={styles.modalContent}>
-                                    <Text style={styles.modalTitle}>Cart</Text>
-                                    <ScrollView style={{ width: "100%" }}>
-                                        <View style={{ rowGap: 10 }}>{renderCart}</View>
-                                    </ScrollView>
-                                    <View style={styles.modalButtonsContainer}>
-                                        <TouchableOpacity
-                                            style={[styles.modalButton, styles.cancelButton]}
-                                            onPress={() => setVisibleCart(false)}
-                                        >
-                                            <Text style={styles.modalButtonText}>Close</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-                        </Modal>
+                        <Modal animationType="fade" transparent={true} visible={visibleCart} onRequestClose={() => setVisibleCart(false)}>
+    <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Cart</Text>
+            <ScrollView style={{ width: "100%" }}>
+                <View style={{ rowGap: 10 }}>{renderCart}</View>
+            </ScrollView>
+            <Text style={styles.totalPrice}>Total: ${calculateTotal().toFixed(2)}</Text>
+            <View style={styles.modalButtonsContainer}>
+            <TouchableOpacity style={[styles.modalButton, {backgroundColor: 'blue'}]} onPress={() => {alert("Thanh toán thành công"), setVisibleCart(false), setCart([])}}>
+                    <Text style={styles.modalButtonText}>Payment</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setVisibleCart(false)}>
+                    <Text style={styles.modalButtonText}>Close</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    </View>
+</Modal>
+
 
                         <View style={styles.searchContainer}>
                             <Pressable style={styles.searchBox}>
@@ -208,41 +212,79 @@ const Screen_02 = () => {
 
                         {/* Modal add */}
                         <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={() => setVisible(false)}>
-                            <View style={styles.modalOverlay}>
-                                <View style={styles.modalContent}>
-                                    <Text style={styles.modalTitle}>Add to cart</Text>
-                                    {currentProduct && (
-                                        <>
-                                            <Image
-                                                source={{ uri: currentProduct.image }}
-                                                style={styles.modalProductImage}
-                                                resizeMode="contain"
-                                            />
-                                            <Text style={styles.modalProductTitle}>{currentProduct.title}</Text>
-                                            <Text style={styles.modalProductPrice}>{currentProduct.price}</Text>
-                                        </>
-                                    )}
-                                    <View style={styles.modalButtonsContainer}>
-                                        <TouchableOpacity
-                                            style={[styles.modalButton, styles.cancelButton]}
-                                            onPress={() => setVisible(false)}
-                                        >
-                                            <Text style={styles.modalButtonText}>Cancel</Text>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            style={[styles.modalButton, styles.addButton]}
-                                            onPress={() => {
-                                                setCart((prev) => [...prev, currentProduct]);
-                                                alert("Add to cart successfully!");
-                                                setVisible(false);
-                                            }}
-                                        >
-                                            <Text style={styles.modalButtonText}>Add</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-                        </Modal>
+                <View style={styles.modalOverlay}>
+                 <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Add to cart</Text>
+                {currentProduct && (
+                    <>
+                        <Image
+                            source={{ uri: currentProduct.image }}
+                            style={styles.modalProductImage}
+                            resizeMode="contain"
+                        />
+                        <Text style={styles.modalProductTitle}>{currentProduct.title}</Text>
+                        <Text style={styles.modalProductPrice}>{currentProduct.price}</Text>
+                        
+                        {/* Thêm lựa chọn số lượng */}
+                        <View style={styles.quantityContainer}>
+                            <TouchableOpacity
+                                style={styles.quantityButton}
+                                onPress={() => setQuantity((prev) => Math.max(1, prev - 1))} // Giảm số lượng, không nhỏ hơn 1
+                            >
+                                <Text style={styles.quantityButtonText}>-</Text>
+                            </TouchableOpacity>
+                            <TextInput
+                                style={styles.quantityInput}
+                                keyboardType="numeric"
+                                value={quantity.toString()}
+                                onChangeText={(value) => setQuantity(Math.max(1, parseInt(value) || 1))} // Đảm bảo số lượng luôn >= 1
+                            />
+                            <TouchableOpacity
+                                style={styles.quantityButton}
+                                onPress={() => setQuantity((prev) => prev + 1)} // Tăng số lượng
+                            >
+                                <Text style={styles.quantityButtonText}>+</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </>
+                )}
+                
+                <View style={styles.modalButtonsContainer}>
+                    <TouchableOpacity
+                        style={[styles.modalButton, styles.cancelButton]}
+                        onPress={() => setVisible(false)}
+                    >
+                        <Text style={styles.modalButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                    style={[styles.modalButton, styles.addButton]}
+                    onPress={() => {
+                        // Kiểm tra nếu sản phẩm đã có trong giỏ hàng
+                        const existingProduct = cart.find(item => item.id === currentProduct.id);
+                        if (existingProduct) {
+                            // Nếu có, tăng số lượng
+                            setCart((prev) => 
+                                prev.map(item => 
+                                    item.id === currentProduct.id 
+                                    ? { ...item, quantity: item.quantity + quantity } 
+                                    : item
+                                )
+                            );
+                        } else {
+                            // Nếu không có, thêm sản phẩm mới với số lượng
+                            setCart((prev) => [...prev, { ...currentProduct, quantity }]);
+                        }
+                        alert("Add to cart successfully!");
+                        setVisible(false);
+                        setQuantity(1); // Reset lại số lượng sau khi thêm
+                    }}
+                >
+                    <Text style={styles.modalButtonText}>Add</Text>
+                </TouchableOpacity>
+                </View>
+            </View>
+        </View>
+    </Modal>
 
                         {/* Button */}
                         <TouchableOpacity style={styles.seeAllProductsButton} onPress={() => setShowAllProducts((prev) => !prev)}>
@@ -527,6 +569,34 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "600",
+    },
+    quantityContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    quantityButton: {
+        backgroundColor: '#ddd',
+        padding: 10,
+        borderRadius: 5,
+    },
+    quantityButtonText: {
+        fontSize: 20,
+        color: '#333',
+    },
+    quantityInput: {
+        width: 50,
+        textAlign: 'center',
+        fontSize: 18,
+        marginHorizontal: 10,
+        borderBottomWidth: 1,
+        borderColor: '#ccc',
+    },
+    totalPrice: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginVertical: 10,
+        textAlign: 'center', // Căn giữa
     },
 });
 

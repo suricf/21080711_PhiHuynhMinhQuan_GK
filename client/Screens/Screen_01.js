@@ -88,6 +88,30 @@ const Screen_01 = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </View>
+            <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginVertical: 20
+                    }}
+                >
+                    <View style={{ backgroundColor: '#ccc', height: 1, width: 160, marginRight: 5 }}></View>
+                    or
+                    <View style={{ backgroundColor: '#ccc', height: 1, width: 160, marginLeft: 5 }}></View>
+
+                </View>
+
+                <View
+                    style={{ flexDirection: 'row', justifyContent: 'center' }}
+                >
+                    <Image source={require("../assets/Data/face.png")} />
+                    <Image source={require("../assets/Data/google.png")}
+                        style={{ marginHorizontal: 10 }}
+                    />
+                    <Image source={require("../assets/Data/apple.png")} />
+
+                </View>
         </View>
     );
 }
